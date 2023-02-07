@@ -20,6 +20,7 @@ async function run() {
         const serviceCollection = client.db("electroHouse").collection("services");
         const inventoryCollection = client.db("electroHouse").collection("inventory");
 
+        // Load All Services
         app.get('/service', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query);
@@ -27,6 +28,7 @@ async function run() {
             res.send(services);
         });
 
+        // Load All Inventory/Items
         app.get('/inventory', async (req, res) => {
             const query = {};
             const cursor = inventoryCollection.find(query);
@@ -41,12 +43,35 @@ async function run() {
             res.send(inventory);
         });
 
-        // Add New Items
+        // Add New Inventory/Item
         app.post('/inventory', async (req, res) => {
             const newInventory = req.body;
             const result = await inventoryCollection.insertOne(newInventory);
             res.send(result);
         });
+
+        // Delete Inventory/Item
+        app.delete('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = inventoryCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        // Update
+        app.put('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const delivered = req.body;
+            const query = { _id: new ObjectId(id) };
+            const option = { upset: true }
+            const updateDoc = {
+                $set: {
+                    quantity: delivered.update
+                },
+            }
+            const result = await inventoryCollection.updateOne(query, updateDoc, option);
+            res.send(result)
+        })
     }
     finally {
 
